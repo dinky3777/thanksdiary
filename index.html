@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>감사일기</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --card: #ffffff;
+      --accent: #2563eb;
+      --accent-soft: rgba(37, 99, 235, 0.08);
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: "Inter", sans-serif;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    .header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .logo { font-size: 22px; font-weight: 700; }
+    .just-do-it { font-size: 13px; font-weight: 600; color: var(--accent); }
+    .today-label { font-size: 14px; font-weight: 600; color: var(--accent); }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-login {
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .header-save {
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    /* BODY */
+    .body {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+
+    #noteContent {
+      width: 100%;
+      border: none;
+      outline: none;
+      resize: none;
+      height: 240px;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* CALENDAR */
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .month-label { font-size: 15px; font-weight: 600; }
+
+    .nav-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .day-name {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .day-cell {
+      height: 34px;
+      border-radius: 999px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      font-size: 13px;
+      position: relative;
+    }
+
+    .day-cell.selected {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .day-cell.has-note:not(.selected) {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .day-dot {
+      position: absolute;
+      bottom: 5px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    /* LIST */
+    .list-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .list-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .list-item:last-child { border-bottom: none; }
+
+    .list-date {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .list-preview {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 1; /* 표준 속성 */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* GOALS */
+    .goals-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .goals-textarea {
+      width: 100%;
+      height: 140px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      font-size: 14px;
+      resize: none;
+      outline: none;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111827;
+      color: #fff;
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      opacity: 0;
+      transition: 0.2s;
+      z-index: 50;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    /* PC GRID */
+    @media (min-width: 1024px) {
+      .body {
+        display: grid;
+        grid-template-columns: 1.8fr 1fr;
+        grid-auto-rows: auto;
+        gap: 24px;
+      }
+
+      #mainCard { grid-column: 1; grid-row: 1; }
+      #calendarCard { grid-column: 2; grid-row: 1; }
+      #listCard { grid-column: 1; grid-row: 2; }
+      #goalCard { grid-column: 2; grid-row: 2; }
+
+      #noteContent { height: 320px; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="shell">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="title-row">
+        <div class="logo">감사일기</div>
+        <span class="just-do-it">JUST DO IT</span>
+      </div>
+      <div class="today-label" id="todayLabel"></div>
+    </div>
+
+    <div class="header-right">
+      <button id="loginBtn" class="header-login">Google 로그인</button>
+      <button id="logoutBtn" class="header-login" style="display:none;">로그아웃</button>
+      <button id="saveAllBtn" class="header-save">저장</button>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <main class="body">
+
+    <section id="mainCard" class="card">
+      <textarea id="noteContent" placeholder="오늘의 감사 내용을 적어보세요"></textarea>
+    </section>
+
+    <section id="calendarCard" class="card">
+      <div class="calendar-header">
+        <button class="nav-btn" id="prevMonthBtn">&#8249;</button>
+        <div class="month-label" id="monthLabel"></div>
+        <button class="nav-btn" id="nextMonthBtn">&#8250;</button>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </section>
+
+    <section id="listCard" class="card">
+      <div class="list-title">일기 목록</div>
+      <div id="listContent"></div>
+    </section>
+
+    <section id="goalCard" class="card">
+      <div class="goals-title">이번달 목표</div>
+      <textarea id="goalContent" class="goals-textarea" placeholder="이번 달 감사/신앙/삶의 목표를 적어보세요"></textarea>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+</div>
+
+<!-- JS -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import {
+    getFirestore, doc, setDoc, getDocs, collection
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  /* Firebase */
+  const firebaseConfig = {
+    apiKey: "AIzaSyAqXwr3_cSQzhUE0rIiKMGOW3Fiyh4ekxY",
+    authDomain: "thanksdiary-8bd5b.firebaseapp.com",
+    projectId: "thanksdiary-8bd5b",
+    storageBucket: "thanksdiary-8bd5b.appspot.com",
+    messagingSenderId: "457774999618",
+    appId: "1:457774999618:web:0cabb65624ae7e170ea5db"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  const db = getFirestore(app);
+
+  /* DOM */
+  const noteContent = document.getElementById("noteContent");
+  const todayLabel  = document.getElementById("todayLabel");
+  const prevMonthBtn = document.getElementById("prevMonthBtn");
+  const nextMonthBtn = document.getElementById("nextMonthBtn");
+  const monthLabel = document.getElementById("monthLabel");
+  const calendarGrid = document.getElementById("calendarGrid");
+  const listContent = document.getElementById("listContent");
+  const goalContent = document.getElementById("goalContent");
+  const saveAllBtn = document.getElementById("saveAllBtn");
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const toast = document.getElementById("toast");
+
+  let selectedDate = "";
+  let currentYear = 0;
+  let currentMonth = 0;
+  let currentUser = null;
+  let diaryCache = {};
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 1500);
+  }
+
+  function getLocalDateString(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function formatDateLabel(dateStr) {
+    const d = new Date(dateStr);
+    const days = ["일","월","화","수","목","금","토"];
+    return `${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,"0")}. ${
+      String(d.getDate()).padStart(2,"0")} (${days[d.getDay()]})`;
+  }
+
+  function loadLocal() {
+    try { return JSON.parse(localStorage.getItem("gratitudeDiary2025") || "{}"); }
+    catch { return {}; }
+  }
+  function saveLocal(store) {
+    localStorage.setItem("gratitudeDiary2025", JSON.stringify(store));
+  }
+
+  async function loadCloud(uid) {
+    const col = collection(db, "users", uid, "diary");
+    const snap = await getDocs(col);
+    let data = {};
+    snap.forEach(d => data[d.id] = d.data());
+    return data;
+  }
+  async function saveCloud(uid, date, content) {
+    const ref = doc(db, "users", uid, "diary", date);
+    await setDoc(ref, { content }, { merge: true });
+  }
+
+  function loadNote(dateStr) {
+    selectedDate = dateStr;
+    todayLabel.textContent = formatDateLabel(dateStr);
+    noteContent.value = diaryCache[dateStr]?.content || "";
+    renderCalendar();
+    renderList();
+  }
+
+  function renderList() {
+    listContent.innerHTML = "";
+
+    const keys = Object.keys(diaryCache).sort().reverse();
+    keys.forEach(date => {
+      const entry = diaryCache[date];
+      const preview = entry.content.replace(/\s+/g, " ").slice(0, 150);
+
+      const div = document.createElement("div");
+      div.className = "list-item";
+      div.onclick = () => loadNote(date);
+      div.innerHTML = `
+        <div class="list-date">${date}</div>
+        <div class="list-preview">${preview}</div>
+      `;
+      listContent.appendChild(div);
+    });
+  }
+
+  function renderCalendar() {
+    calendarGrid.innerHTML = "";
+    monthLabel.textContent = `${currentYear}년 ${currentMonth+1}월`;
+
+    const week = ["일","월","화","수","목","금","토"];
+    week.forEach(w => {
+      const el = document.createElement("div");
+      el.className = "day-name";
+      el.textContent = w;
+      calendarGrid.appendChild(el);
+    });
+
+    const first = new Date(currentYear, currentMonth, 1).getDay();
+    const last = new Date(currentYear, currentMonth+1, 0).getDate();
+
+    for (let i = 0; i < first; i++) calendarGrid.appendChild(document.createElement("div"));
+
+    for (let d = 1; d <= last; d++) {
+      const dateStr = getLocalDateString(new Date(currentYear, currentMonth, d));
+      const cell = document.createElement("div");
+      cell.className = "day-cell";
+      cell.textContent = d;
+
+      if (dateStr === selectedDate) cell.classList.add("selected");
+      if (diaryCache[dateStr]) {
+        const dot = document.createElement("div");
+        dot.className = "day-dot";
+        cell.appendChild(dot);
+        cell.classList.add("has-note");
+      }
+
+      cell.onclick = () => loadNote(dateStr);
+      calendarGrid.appendChild(cell);
+    }
+  }
+
+  const GOAL_KEY = "gratitudeGoals";
+
+  function getGoalKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+  }
+
+  function loadGoal() {
+    try {
+      const obj = JSON.parse(localStorage.getItem(GOAL_KEY) || "{}");
+      goalContent.value = obj[getGoalKey()] || "";
+    } catch {
+      goalContent.value = "";
+    }
+  }
+
+  function saveGoal() {
+    let obj = {};
+    try { obj = JSON.parse(localStorage.getItem(GOAL_KEY) || "{}"); }
+    catch { obj = {}; }
+
+    obj[getGoalKey()] = goalContent.value;
+    localStorage.setItem(GOAL_KEY, JSON.stringify(obj));
+  }
+
+  async function saveAll() {
+    const note = noteContent.value;
+
+    if (currentUser) {
+      await saveCloud(currentUser.uid, selectedDate, note);
+    } else {
+      const store = loadLocal();
+      store[selectedDate] = { content: note };
+      diaryCache = store;
+      saveLocal(store);
+    }
+
+    saveGoal();
+
+    showToast("저장되었습니다.");
+    diaryCache[selectedDate] = { content: note };
+    renderList();
+    renderCalendar();
+  }
+
+  function init() {
+    const today = new Date();
+    const todayStr = getLocalDateString(today);
+    selectedDate = todayStr;
+    todayLabel.textContent = formatDateLabel(todayStr);
+    currentYear = today.getFullYear();
+    currentMonth = today.getMonth();
+
+    loadGoal();
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+
+      if (user) {
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "inline-flex";
+        diaryCache = await loadCloud(user.uid);
+      } else {
+        loginBtn.style.display = "inline-flex";
+        logoutBtn.style.display = "none";
+        diaryCache = loadLocal();
+      }
+
+      loadNote(todayStr);
+    });
+
+    prevMonthBtn.onclick = () => {
+      currentMonth--;
+      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      renderCalendar();
+    };
+
+    nextMonthBtn.onclick = () => {
+      currentMonth++;
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      renderCalendar();
+    };
+
+    loginBtn.onclick = () => signInWithPopup(auth, provider);
+    logoutBtn.onclick = () => signOut(auth);
+
+    saveAllBtn.onclick = saveAll;
+  }
+
+  init();
+</script>
+
+</body>
+</html>
